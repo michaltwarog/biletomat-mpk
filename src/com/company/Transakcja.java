@@ -4,15 +4,22 @@ import java.math.BigDecimal;
 import java.util.Scanner;
 
 public class Transakcja {
-    private final int MAX_NOMINALOW=7; // ilosc akceptowanych nominalow
-    private final int MAX_MONET=500; // maksymalna ilosc monet dla danego nominalu
-    private final int MAX_PRZELEWOW=1000; // maksymalna ilosc przelewow
+    /** ilość akceptowanych nominałow */
+    private final int MAX_NOMINALOW=7;
+    /** maksymalna ilość monet dla danego nominału */
+    private final int MAX_MONET=500;
+    /** maksymalna ilosc przelewów */
+    private final int MAX_PRZELEWOW=1000;
+    /** ilość monet dla danego nominału */
     private int iloscNominalu[];
+    /** ilość wykonanych przelewow */
     private int iloscPrzelewow;
     private double doZaplaty;
-    private final Gotowka [][]monety=new Gotowka[MAX_NOMINALOW][MAX_MONET]; //monety znajdujace sie w biletomacie - kompozycja
-    private final Karta[] historiaPrzelewow=new Karta[MAX_PRZELEWOW];  // kompozycja
-    Scanner in;
+    /** monety znajdujące sie w biletomacie - kompozycja */
+    private final Gotowka [][]monety=new Gotowka[MAX_NOMINALOW][MAX_MONET];
+    /** kompozycja */
+    private final Karta[] historiaPrzelewow=new Karta[MAX_PRZELEWOW];
+    private Scanner in;
     public Transakcja(int []ilosc) {
         iloscNominalu=ilosc;
         in=new Scanner(System.in);
@@ -25,9 +32,15 @@ public class Transakcja {
             }
         }
     }
+
+    /**
+     * umożliwia wybranie formy płatności
+     * @param c kwota do zapłacenia
+     * @return zwraca true jeśli płatność została wykonana pomyślnie
+     */
     public boolean platnosc(double c){
         doZaplaty=c;
-        System.out.println("Wybierz srodek platnosci:\n1.Bezgotowkowa\n2.Gotowkowa\nKażdy inny symbol aby anulować.");
+        System.out.println("Wybierz srodek platnosci:\n1.Bezgotówkowa\n2.Gotówkowa\nKażdy inny symbol aby anulować.");
         boolean czySiePowiodla;
         int i=in.nextInt();
         switch(i) {
@@ -55,6 +68,11 @@ public class Transakcja {
             this.wartosc = wartosc;
         }
     }
+
+    /**
+     * umożliwia zapłacenie gotówką
+     * @return jeśli się powiodło zwraca true
+     */
     private boolean transakcjaGotowkowa(){
         int j=0;
         boolean czySiePowiodla=false;
@@ -77,6 +95,12 @@ public class Transakcja {
         }
         return czySiePowiodla;
     }
+
+    /**
+     * wydaje resztę
+     * @param doWydania kwota którą należy wydać
+     * @return
+     */
     private boolean wydajReszte(double doWydania){
         doWydania=Math.abs(doWydania);
         System.out.println("Do wydania: "+ doWydania);
@@ -98,11 +122,12 @@ public class Transakcja {
         }
         return true;
     }
-
-    private class Gotowka extends Pieniadz{ // dziedziczenie
+    /** dziedziczenie */
+    private class Gotowka extends Pieniadz{
         private String nazwa;
         private enum Nominaly{
-            _5gr(0.05,"5 groszy"),_10gr(0.1,"10 groszy"),_20gr(0.2,"20 groszy"),_50gr(0.5,"50 groszy"),_1zl(1,"1 złoty"),_2zl(2,"2 złote"),_5zl(5,"5 złotych");
+            _5gr(0.05,"5 groszy"),_10gr(0.1,"10 groszy"),_20gr(0.2,"20 groszy"),
+            _50gr(0.5,"50 groszy"),_1zl(1,"1 złoty"),_2zl(2,"2 złote"),_5zl(5,"5 złotych");
             private double cena;
             private String nazwa;
             Nominaly(double i, String n){
@@ -127,6 +152,11 @@ public class Transakcja {
             return nazwa;
         }
     }
+
+    /**
+     * umożliwia płacenie kartą
+     * @return jeśli się powiodło zwraca true
+     */
     private boolean transakcjaBezgotowkowa(){
         if(iloscPrzelewow+1<MAX_PRZELEWOW) {
             historiaPrzelewow[iloscPrzelewow] = new Karta(doZaplaty);
@@ -136,7 +166,8 @@ public class Transakcja {
         }
         return false;
     }
-    private class Karta extends Pieniadz { //dziedziczenie
+    /** dziedziczenie */
+    private class Karta extends Pieniadz {
         private int nrKonta;
         private final static int MAX=9999999;
         private final static int MIN=1000000;
