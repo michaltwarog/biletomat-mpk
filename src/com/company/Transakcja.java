@@ -10,9 +10,9 @@ public class Transakcja {
     private int iloscNominalu[];
     private int iloscPrzelewow;
     private double doZaplaty;
-    Scanner in;
     private final Gotowka [][]monety=new Gotowka[MAX_NOMINALOW][MAX_MONET]; //monety znajdujace sie w biletomacie - KOMPOZYCJA
     private final Karta[] historiaPrzelewow=new Karta[MAX_PRZELEWOW];
+    Scanner in;
     public Transakcja(int []ilosc) {
         iloscNominalu=ilosc;
         in=new Scanner(System.in);
@@ -24,22 +24,22 @@ public class Transakcja {
                 monety[i][j]=new Gotowka(Gotowka.Nominaly.values()[i].zwrocCene(),Gotowka.Nominaly.values()[i].toString());
             }
         }
-       // System.out.println(Gotowka.Nominaly.values()[0].toString());
-       // System.out.println("\n"+monety[0][0].toString().toString());
     }
-    public void platnosc(double c){
+    public boolean platnosc(double c){
         doZaplaty=c;
-        //wybierz srodek platnosci if klasa karta lub gotowka
-        System.out.println("Wybierz srodek platnosci:\n1.Bezgotowkowa\n2.Gotowkowa");
+        System.out.println("Wybierz srodek platnosci:\n1.Bezgotowkowa\n2.Gotowkowa\nKażdy inny symbol aby anulować.");
+        boolean czySiePowiodla;
         int i=in.nextInt();
         switch(i) {
-            case 1: transakcjaBezgotowkowa();
+            case 1: czySiePowiodla=transakcjaBezgotowkowa();
             break;
-            case 2: transakcjaGotowkowa();
+            case 2: czySiePowiodla=transakcjaGotowkowa();
             break;
             default:
                 System.out.println("Wybrano zły numer!");
+                czySiePowiodla=false;
         }
+        return czySiePowiodla;
     }
     private abstract class Pieniadz {
        private double wartosc;
@@ -55,28 +55,29 @@ public class Transakcja {
             this.wartosc = wartosc;
         }
     }
-    public void transakcjaGotowkowa(){
-            /*System.out.println("Monety akceptowane przez automat: ");
-            for(int i=0;i<Nominaly.values().length;i++){
-                System.out.println((i+1)+". "+Nominaly.values()[i]);
-            }*/
+    private boolean transakcjaGotowkowa(){
         int j=0;
+        boolean czySiePowiodla=false;
         while(doZaplaty>0) {
             System.out.println("Włóż monetę. Pozostała kwota do zapłaty: " + doZaplaty);
             for(int i = 0; i< Gotowka.Nominaly.values().length; i++){
                 System.out.println((i+1)+". "+ Gotowka.Nominaly.values()[i].toString());
             }
             j=in.nextInt();
-            monety[j-1][iloscNominalu[j-1]]=new Gotowka(Gotowka.Nominaly.values()[j-1].zwrocCene(),Gotowka.Nominaly.values()[j-1].toString());
-            doZaplaty-=Gotowka.Nominaly.values()[j-1].zwrocCene();
-            j++;
+            if(0<j&&j<=MAX_NOMINALOW) {
+                monety[j - 1][iloscNominalu[j - 1]] = new Gotowka(Gotowka.Nominaly.values()[j - 1].zwrocCene(), Gotowka.Nominaly.values()[j - 1].toString());
+                doZaplaty = (double) Math.round((doZaplaty - monety[j - 1][iloscNominalu[j - 1]].getWartosc()) * 100) / 100;
+                j++;
+                czySiePowiodla=true;
+            }
         }
         if(doZaplaty<0){
             System.out.println("Poczekaj na wydanie reszty.");
-            wydajReszte(doZaplaty);
+            czySiePowiodla=wydajReszte(doZaplaty);
         }
+        return czySiePowiodla;
     }
-    private void wydajReszte(double doWydania){
+    private boolean wydajReszte(double doWydania){
         doWydania=Math.abs(doWydania);
         System.out.println("Do wydania: "+ doWydania);
         while(doWydania>0){
@@ -87,11 +88,15 @@ public class Transakcja {
                     n=monety[i][iloscNominalu[i]-1].getWartosc();
                     indexNominalu=i;
                 }
+                if(iloscNominalu[i]==0){
+                    return false;
+                }
             }
             System.out.println("Wydano: "+monety[indexNominalu][iloscNominalu[indexNominalu]-1]);
-            doWydania-=n;
+            doWydania=(double)Math.round((doWydania-n)*100)/100;
             --iloscNominalu[indexNominalu];
         }
+        return true;
     }
 
     private class Gotowka extends Pieniadz{
@@ -121,12 +126,15 @@ public class Transakcja {
         public String toString() {
             return nazwa;
         }
-        //
     }
-    private void transakcjaBezgotowkowa(){
-        historiaPrzelewow[iloscPrzelewow]=new Karta(doZaplaty);
-        System.out.println(historiaPrzelewow[iloscPrzelewow]);
-        iloscPrzelewow++;
+    private boolean transakcjaBezgotowkowa(){
+        if(iloscPrzelewow+1<MAX_PRZELEWOW) {
+            historiaPrzelewow[iloscPrzelewow] = new Karta(doZaplaty);
+            System.out.println(historiaPrzelewow[iloscPrzelewow]);
+            iloscPrzelewow++;
+            return true;
+        }
+        return false;
     }
     private class Karta extends Pieniadz {
         private int nrKonta;

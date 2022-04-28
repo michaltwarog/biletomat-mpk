@@ -1,45 +1,48 @@
 package com.company;
 
+import java.sql.Date;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
+import static java.lang.String.join;
+
 public class Biletomat {
-    private final String [][]historiaTransakcji= new String[50][4];
+    private final int MAX_TRANSAKCJI=50;
+    private final String [][]historiaTransakcji= new String[MAX_TRANSAKCJI][4];
+    private int iloscTansakcji;
     private final Bilet []bilety=new Bilet[50];
     private int nrBiletu;
-    //wypelnianie automatu
     private int []saldo;
     Transakcja transakcje;
-    //String [][]rodzajBiletow;
-    //String [][]cenaBiletów;
-    //wydawanie reszty
     String lokalizacja;
-    //obiekt klasy bilet
-   // Bilet pojedynczyBilet;
     Rodzaje typ;
     Scanner in;
     Biletomat(int s,String l){
         saldo=new int[7];
         for(int i=0;i<7;i++) {
-            for (int j = 0; j < s; j++) {
-                ++saldo[i];
-            }
+            saldo[i]=s;
         }
         transakcje=new Transakcja(saldo);
         lokalizacja=l;
     }
     @Override
     public String toString() {
-        //data : rodzaj biletu : liczba biletów : dochód aka historia transakcji sumowanie!!!
-        return super.toString();
+        //data : rodzaj biletu : liczba biletów : dochód
+        String historia="";
+        for(int i=0;i<iloscTansakcji;i++){
+            historia+= String.join(" : ",historiaTransakcji[i][0],historiaTransakcji[i][1],historiaTransakcji[i][2],historiaTransakcji[i][3]);
+            historia+='\n';
+        }
+        return historia;
     }
 
-    /**
-     * wypisuje transakcje z podanego dnia
-     * @param date
-     */
     public void wydrukujTransakcje(LocalDate date){
-
+        for(int i=0;i<iloscTansakcji;i++){
+            if(date.toString().equals(historiaTransakcji[i][0])){
+                System.out.println(String.join(":",historiaTransakcji[i][0],historiaTransakcji[i][1],historiaTransakcji[i][2],historiaTransakcji[i][3]));
+            }
+        }
     }
 
     enum Rodzaje{NORMALNY,ULGOWY,GRUPOWY};
@@ -95,15 +98,13 @@ public class Biletomat {
 
     }
     private void dostepneRodzaje(){
-        System.out.println("Dostepne rodzaje biletow:\n");
+        System.out.println("Dostepne rodzaje biletow:");
         System.out.println("1. "+Rodzaje.values()[0]);
         System.out.println("2. "+Rodzaje.values()[1]);
         System.out.println("3. "+Rodzaje.values()[2]);
 
     }
     private void wybierzPodrodzaj(){
-        // String rodzaj;
-       // Double cena;
         Normalny nor;
         Ulgowy ul;
         Grupowy grup;
@@ -142,21 +143,44 @@ public class Biletomat {
         double reszta;
         in=new Scanner(System.in);
         Transakcja tran;
-       // while(!"2".equals(in)) {
-            //Start lub tryb ...
-        System.out.println("Wybierz rodzaj biletu:");
-        dostepneRodzaje();
 
-        int i = in.nextInt();
-        typ = Rodzaje.values()[i - 1];
-        wybierzPodrodzaj();
-        //ilosc biletow
-        System.out.print("Podaj ilość:");
-        i=in.nextInt();
-        if(i>0) {
-            transakcje.platnosc(bilety[nrBiletu - 1].cena * i);
+        int o=0;
+        while(o!=4){
+            System.out.println("1.Kup bilet.\n2.Wypisz historię biletomatu.\n3.Wypisz historię z danego dnia.\n4.Zakończ program");
+            o=in.nextInt();
+            System.out.println();
+            if(o==1){
+                System.out.println("Wybierz rodzaj biletu:");
+                dostepneRodzaje();
+
+                int i = in.nextInt();
+                typ = Rodzaje.values()[i - 1];
+                wybierzPodrodzaj();
+                System.out.print("Podaj ilość:");
+                i = in.nextInt();
+                if (i > 0) {
+                    if (transakcje.platnosc(bilety[nrBiletu - 1].cena * i)) {
+                        historiaTransakcji[iloscTansakcji][0] = LocalDate.now().toString();
+                        historiaTransakcji[iloscTansakcji][1] = bilety[nrBiletu - 1].getRodzaj();
+                        historiaTransakcji[iloscTansakcji][2] = Integer.toString(i);
+                        historiaTransakcji[iloscTansakcji][3] = Integer.toString((int) bilety[nrBiletu - 1].cena * i);
+                    } else {
+                        System.out.println("Transakcja nie powiodła się.");
+                    }
+                }
+                iloscTansakcji++;
+            }
+            else if(o==2){
+                System.out.println(this.toString());
+            }
+            else if(o==3){
+                System.out.println("Podaj datę (yy-MM-dd)");
+                //DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yy-MM-dd");
+                String n=in.next();
+                LocalDate d=LocalDate.parse(n);
+                this.wydrukujTransakcje(d);
+            }
         }
-        //}//
 
     }
     private abstract class BiletRodzaj{
