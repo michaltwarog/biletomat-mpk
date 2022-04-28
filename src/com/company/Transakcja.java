@@ -4,14 +4,14 @@ import java.math.BigDecimal;
 import java.util.Scanner;
 
 public class Transakcja {
-    private final int MAX_NOMINALOW=7; //ilosc akceptowanych nominalow
-    private final int MAX_MONET=500; //maksymalna ilosc monet dla danego nominalu
-    private final int MAX_PRZELEWOW=1000;
+    private final int MAX_NOMINALOW=7; // ilosc akceptowanych nominalow
+    private final int MAX_MONET=500; // maksymalna ilosc monet dla danego nominalu
+    private final int MAX_PRZELEWOW=1000; // maksymalna ilosc przelewow
     private int iloscNominalu[];
     private int iloscPrzelewow;
     private double doZaplaty;
-    private final Gotowka [][]monety=new Gotowka[MAX_NOMINALOW][MAX_MONET]; //monety znajdujace sie w biletomacie - KOMPOZYCJA
-    private final Karta[] historiaPrzelewow=new Karta[MAX_PRZELEWOW];
+    private final Gotowka [][]monety=new Gotowka[MAX_NOMINALOW][MAX_MONET]; //monety znajdujace sie w biletomacie - kompozycja
+    private final Karta[] historiaPrzelewow=new Karta[MAX_PRZELEWOW];  // kompozycja
     Scanner in;
     public Transakcja(int []ilosc) {
         iloscNominalu=ilosc;
@@ -99,7 +99,7 @@ public class Transakcja {
         return true;
     }
 
-    private class Gotowka extends Pieniadz{
+    private class Gotowka extends Pieniadz{ // dziedziczenie
         private String nazwa;
         private enum Nominaly{
             _5gr(0.05,"5 groszy"),_10gr(0.1,"10 groszy"),_20gr(0.2,"20 groszy"),_50gr(0.5,"50 groszy"),_1zl(1,"1 złoty"),_2zl(2,"2 złote"),_5zl(5,"5 złotych");
@@ -136,7 +136,7 @@ public class Transakcja {
         }
         return false;
     }
-    private class Karta extends Pieniadz {
+    private class Karta extends Pieniadz { //dziedziczenie
         private int nrKonta;
         private final static int MAX=9999999;
         private final static int MIN=1000000;

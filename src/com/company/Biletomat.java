@@ -11,7 +11,7 @@ public class Biletomat {
     private final int MAX_TRANSAKCJI=50;
     private final String [][]historiaTransakcji= new String[MAX_TRANSAKCJI][4];
     private int iloscTansakcji;
-    private final Bilet []bilety=new Bilet[50];
+    private final Bilet []bilety=new Bilet[50]; // kompozycja
     private int nrBiletu;
     private int []saldo;
     Transakcja transakcje;
@@ -204,7 +204,7 @@ public class Biletomat {
         }
 
     }
-   private class Bilet extends BiletRodzaj{
+   private class Bilet extends BiletRodzaj{ // dziedziczenie
         private LocalDate data;
         public Bilet(String r, double c){
             super.setCena(c);
